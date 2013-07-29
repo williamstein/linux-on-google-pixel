@@ -45,18 +45,49 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
     kazam also worked well.  NICE.
 
 - [x] Suspend/resume (to RAM):
+   - Brock Tice's kernels: but comes back a bit messed up -- Settings --> Power management comes up broken.
+   - Russian kernel: 3d video is *great*; power management comes back messed up;  CRAZY: cat /proc/cpuinfo |grep MHz
    - with saucy 3.10.0-5-generic as of 2013-07-27 it works if I spend using "sudo pm-suspend", even if I'm using 3d graphics.
      On RESUME, the battery information via upower (which kde uses) is broken completely.  However, just looking directly
      in the relevant directly still works just fine -- so I wrote a one-liner to display remaining the battery percentage.
      The /proc/cpuinfo speed looks good and works properly.
 
-wstein@pixel:~/bin$ more pixel-suspend
-sudo pm-suspend
-wstein@pixel:~/bin$ more pixel-battery
-cat /sys/devices/LNXSYSTM:00/device:00/PNP0A08:00/device:20/PNP0C09:00/PNP0C0A:00/power_supply/BAT0/capacity
+   - I have a cript pixel-suspend that I manually run to suspend:
 
-   - Brock Tice's kernels: but comes back a bit messed up -- Settings --> Power management comes up broken.
-   - Russian kernel: 3d video is *great*; power management comes back messed up;  CRAZY: cat /proc/cpuinfo |grep MHz
+            sudo chvt 1; sleep 1
+            sudo pm-suspend
+            sleep 1; sudo chvt 7
+            sudo killall upowerd  # so my battery monitor works (kubuntu's doesn't though)
+
+     put this line in the file that comes up when doing `sudo visudo`:
+
+            wstein ALL=(ALL) NOPASSWD: /usr/sbin/pm-suspend
+            wstein ALL=(ALL) NOPASSWD: /bin/chvt
+            wstein ALL=(ALL) NOPASSWD: /usr/bin/killall     # single user system -- I don't care.
+
+
+     and pixel-battery-monitor is getting stupid and ugly, but is:
+
+            wstein@pixel:~/bin$ more pixel-battery-monitor
+            #!/usr/bin/env python
+
+            import os,sys,time
+
+            def monitor1():
+                a = open("/sys/devices/LNXSYSTM:00/device:00/PNP0A08:00/device:20/PNP0C09:00/PNP0C0A:00/power_supply/BAT0/capacity").read().strip()
+                c = os.popen("battery|grep time").read().strip()
+                i = c.find(":"); c = c[i+1:].strip()
+                return "battery %s%% (%s, %s)"%(a, c, os.popen('date').read().strip())
+
+            while 1:
+                s = monitor1()
+                print s
+                sys.stdout.write("\x1b]2;%s\x07"%s)
+                sys.stdout.flush()
+                time.sleep(6)
+
+
+
 
 
 - [ ] Keys: Page up/Page down; Home/End
