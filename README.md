@@ -74,6 +74,7 @@ cat /sys/devices/LNXSYSTM:00/device:00/PNP0A08:00/device:20/PNP0C09:00/PNP0C0A:0
 - [ ] LTE+Verizon (probably impossible -- don't care)
 - [ ] Google Drive sync (?) -- don't care.
 - [ ] offline copy of my email in kmail (?)
+- [ ] currently no way to watch netflix, since netflix-desktop isn't in Saucy Ubuntu yet.
 
 
 ## Plan for installing Linux on the internal SSD:
@@ -90,5 +91,62 @@ x- try to boot (?) -- this may require some serious grub trickier, but I'll figu
 ## F'ing ChromeOS -- be on your toes when booting!
 
 I installed Ubuntu Saucy to a 64GB external SD card and configured it (e.g., with grub on the master boot record).  I then deleted all partitions on the SSD and used dd (if=/dev/sdb of=/dev/sda) to completely replace the internal SSD with the contents of my SD card.   This worked very well... until I let it boot up and I *didn't* press Control-L!   Then I got two beeps, and the BIOS decided to hose my grub install.    I booted using the external SD card, did update-grub2 (which noticed the linux on /dev/sda), then rebooted back into my Linux on /dev/sda (by using SEABios to boot of the external card's grub).  Finally, I did "grub-install --root-directory=/ /dev/sda", and now things are fine.   MORAL: pay attention at the white screen and press Control-L; hope my computer never crashes and reboots automatically;  always keep a bootable SD card handy!   I'm really annoyed by how this Pixel deletes stuff by design (both in ChromeOS and in this particular case); it's not how computers should work.
+
+
+# Wifi seems to get slow for me every so often.
+
+"The pixel has a :"Atheros AR9462 Rev:2" in it"  (see http://www.mail-archive.com/ath9k-devel@lists.ath9k.org/msg09998.html)
+Not sure yet if this is a real problem or something involving my home network.
+
+The problem is definitely *NOT* my connection from wifi to the outside world, since I get the pause on my pixel, but not on
+my macbook pro... at the exact same time.
+
+This is *precisely* the problem I'm seeing: https://bbs.archlinux.org/viewtopic.php?id=159290
+
+This problem is 100% definitely caused by NetworkManager automatically scanning every 20 seconds but quickly backing off to 2 minutes.
+I can simulate that with `sudo iwlist wlan0 scan`, during which the network freezes.... for *FOUR SECONDS*.
+
+Using iwevent proves this.
+
+The "asshole" devs of NetworkManager, evidently refuse to make the scanning frequency configurable.
+
+I'm now building NetworkManager-0.9.8.2, but with src/nm-device-wifi.c having the #define's changed to this, since I can stand a slowdown every 30 minutes (but not every 2 minutes!):
+
+    #define SCAN_INTERVAL_MIN 3
+    #define SCAN_INTERVAL_STEP 200
+    #define SCAN_INTERVAL_MAX 1800
+
+I had to apt-get install the following stuff I didn't have:
+
+    sudo apt-get install libgudev-1.0-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev  libdbus-1-dev libdbus-glib-1-dev libnss3-dev ppp-dev
+
+Building 0.9.8.2 failed.  Now trying 0.9.8.0.  Nope. Ubuntu must have patches. :-(
+
+OK, via Ubuntu, follow these directions:
+
+    http://askubuntu.com/questions/28372/how-do-i-get-the-source-code-of-packages-installed-through-apt-get
+
+    apt-get source network-manager
+    apt-get build-dep network-manager
+    cd network-manager-0.9.8.0/
+    dpkg-buildpackage -rfakeroot -uc -b -j8
+
+And, surprisingly, it fails with "import glib" in Python!?  This is because it's using my own python setup. Woops.
+
+Even trying to build as root (hence clean environ) I can't build it -- the test suite fails.  It could possibly be because I changed the timeouts...
+
+OK, I tried building again in /tmp from scratch as root, after making that one change to nm-device-wifi.c above.
+It worked.  I then did `dpkg -i /tmp/*.deb`.  Then I did
+
+        stop network-manager
+        start network-manager
+
+Each time around according to the source, it adds (basically) `SCAN_INTERVAL_STEP/factor` seconds to the time.  I think that should be usable.
+
+This is the output of iwevent, right after connecting.
+
+02:23:59.912060   wlan0    Scan request completed
+02:26:26.780167   wlan0    Scan request completed
+02:29:49.705884   wlan0    Scan request completed
 
 
