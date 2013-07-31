@@ -127,57 +127,19 @@ I installed Ubuntu Saucy to a 64GB external SD card and configured it (e.g., wit
 # Wifi seems to get slow for me every so often.
 
 "The pixel has a :"Atheros AR9462 Rev:2" in it"  (see http://www.mail-archive.com/ath9k-devel@lists.ath9k.org/msg09998.html)
-Not sure yet if this is a real problem or something involving my home network.
 
-The problem is definitely *NOT* my connection from wifi to the outside world, since I get the pause on my pixel, but not on
-my macbook pro... at the exact same time.
+Every few seconds (up to minutes) the network completely stops working for about 5-10 seconds.
 
-This is *precisely* the problem I'm seeing: https://bbs.archlinux.org/viewtopic.php?id=159290
+It turns out -- after hours of research -- that this is the result of NetworkManager doing a wifi scan.
+Observe for your yourself by typing
 
-This problem is 100% definitely caused by NetworkManager automatically scanning every 20 seconds but quickly backing off to 2 minutes.
-I can simulate that with `sudo iwlist wlan0 scan`, during which the network freezes.... for *FOUR SECONDS*.
+    iwevent  # watch for events
+    sudo iwlist wlan0 scan  # scan
 
-Using iwevent proves this.
-
-The "asshole" devs of NetworkManager, evidently refuse to make the scanning frequency configurable.
-
-I'm now building NetworkManager-0.9.8.2, but with src/nm-device-wifi.c having the #define's changed to this, since I can stand a slowdown every 30 minutes (but not every 2 minutes!):
-
-    #define SCAN_INTERVAL_MIN 3
-    #define SCAN_INTERVAL_STEP 200
-    #define SCAN_INTERVAL_MAX 1800
-
-I had to apt-get install the following stuff I didn't have:
-
-    sudo apt-get install libgudev-1.0-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev  libdbus-1-dev libdbus-glib-1-dev libnss3-dev ppp-dev
-
-Building 0.9.8.2 failed.  Now trying 0.9.8.0.  Nope. Ubuntu must have patches. :-(
-
-OK, via Ubuntu, follow these directions:
-
-    http://askubuntu.com/questions/28372/how-do-i-get-the-source-code-of-packages-installed-through-apt-get
-
-    apt-get source network-manager
-    apt-get build-dep network-manager
-    cd network-manager-0.9.8.0/
-    dpkg-buildpackage -rfakeroot -uc -b -j8
-
-And, surprisingly, it fails with "import glib" in Python!?  This is because it's using my own python setup. Woops.
-
-Even trying to build as root (hence clean environ) I can't build it -- the test suite fails.  It could possibly be because I changed the timeouts...
-
-OK, I tried building again in /tmp from scratch as root, after making that one change to nm-device-wifi.c above.
-It worked.  I then did `dpkg -i /tmp/*.deb`.  Then I did
-
-        stop network-manager
-        start network-manager
-
-Each time around according to the source, it adds (basically) `SCAN_INTERVAL_STEP/factor` seconds to the time.  I think that should be usable.
-
-This is the output of iwevent, right after connecting.
-
-02:23:59.912060   wlan0    Scan request completed
-02:26:26.780167   wlan0    Scan request completed
-02:29:49.705884   wlan0    Scan request completed
+The symptons on scan are identical.   I had tried to hack around this by rebuilding network-manager (as suggested by <https://bbs.archlinux.org/viewtopic.php?id=159290>).   However, that did not work -- it only made the problem less painful.
+However, I found comment 20 at <https://bugzilla.redhat.com/show_bug.cgi?id=916203>.  This says to set the BSSID of the
+current wifi connection in the NetworkManager gui.  I got the BSSID using `sudo iwlist wlan0 scan`, and set it... and indeed,
+suddenly all scanning completely stops while on that network.  Crazy.  So again I have solid networking... as long as I'm careful
+to explicitly set this BSSID thing on each network.  That this is the fix is ridiculous, but heh.
 
 
