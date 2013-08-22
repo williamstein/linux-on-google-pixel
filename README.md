@@ -6,7 +6,7 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
 
   - Remove ChromeOS and install native Linux (kubuntu 13.10)
 
-  - built Linux kernel 3.11.0-3  (following https://help.ubuntu.com/community/Kernel/Compile) with support for zswap and put this in /etc/default/grub to enable zswap: GRUB_CMDLINE_LINUX_DEFAULT="zswap.enabled=1"
+  - built Linux kernel 3.11.0-3  (following https://wiki.ubuntu.com/Kernel/BuildYourOwnKernel) with support for zswap and put this in /etc/default/grub to enable zswap: GRUB_CMDLINE_LINUX_DEFAULT="zswap.enabled=1"
 
   - I'm using a 4GB swap
 
@@ -73,7 +73,7 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
      in the relevant directly still works just fine -- so I wrote a one-liner to display remaining the battery percentage.
      The /proc/cpuinfo speed looks good and works properly.
 
-   - I have a cript pixel-suspend that I manually run to suspend:
+   - I have a script pixel-suspend that I manually run to suspend:
 
             sudo chvt 1; sleep 1
             sudo pm-suspend
@@ -111,8 +111,8 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
 
 
 
-- [ ] Keys: Page up/Page down; Home/End
-      Maybe could use this... ?? <https://kernel.googlesource.com/pub/scm/linux/kernel/git/gregkh/patches/+/6103f75aecd20ee13aaeb17e908262507e94a2ce/0001-Simulate-fake-Fn-key-on-PS-2-keyboards-w-o-one-eg.-C.patch>
+- [x] Keys: Page up/Page down; Home/End
+      I use this: <https://kernel.googlesource.com/pub/scm/linux/kernel/git/gregkh/patches/+/6103f75aecd20ee13aaeb17e908262507e94a2ce/0001-Simulate-fake-Fn-key-on-PS-2-keyboards-w-o-one-eg.-C.patch>
 
 - [x] external display  -- just works; freakin' amazing.
 
@@ -120,13 +120,13 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
 
 - [x] download photos from my camera(s) -- can use sd card, etc., of course
 
+- [x] netflix: via netflix-desktop which is in Saucy Ubuntu now.
 
 ## Low priority issues/questions
 
 - [ ] LTE+Verizon (probably impossible -- don't care)
 - [ ] Google Drive sync (?) -- don't care.
-- [ ] offline copy of my email in kmail (?)
-- [ ] currently no way to watch netflix, since netflix-desktop isn't in Saucy Ubuntu yet.
+- [ ] offline copy of my email in thunderbird -- I have too much email...
 
 
 ## Plan for installing Linux on the internal SSD:
