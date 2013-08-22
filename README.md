@@ -2,6 +2,27 @@
 
 These are just some random notes oriented toward my own needs.  This is *not* a step-by-step guide.
 
+## I'm trying everything I can think of to make the Chromebook Pixel usable for a power user such as myself
+
+  - Remove ChromeOS and install native Linux (kubuntu 13.10)
+
+  - built Linux kernel 3.11.0-3  (following https://help.ubuntu.com/community/Kernel/Compile) with support for zswap and put this in /etc/default/grub to enable zswap: GRUB_CMDLINE_LINUX_DEFAULT="zswap.enabled=1"
+
+  - I'm using a 4GB swap
+
+     fallocate -l4096M /swap
+     mkswap /swap
+     swapon /swap
+
+  - mount the /dev/sda1 ssd with these options "noatime,discard", where "discard" gives TRIM support
+
+  - Added these two lines to /etc/sysctl.conf to change Linux "swappiness" (see www.freeswitch.org/wiki/SSD_Tuning_for_Linux):
+
+      vm.swappiness=1
+      vm.vfs_cache_pressure=50
+
+
+
 ## Initial Install to SD card
 
 - Useful notes: <https://plus.google.com/100479847213284361344/posts/QhmBpn5GNE9>
