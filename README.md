@@ -8,20 +8,35 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
 
   - built Linux kernel 3.11.0-3  (following https://wiki.ubuntu.com/Kernel/BuildYourOwnKernel) with support for zswap and put this in /etc/default/grub to enable zswap: GRUB_CMDLINE_LINUX_DEFAULT="zswap.enabled=1"
 
-  - I'm using a 4GB swap
+       ** NOTE: I'm no longer using zswap -- it didn't seem to help **
 
-     fallocate -l4096M /swap
+  - I'm using a 8GB swap
+
+     fallocate -l8192M /swap
      mkswap /swap
      swapon /swap
 
   - mount the /dev/sda1 ssd with these options "noatime,discard", where "discard" gives TRIM support
 
-  - Added these two lines to /etc/sysctl.conf to change Linux "swappiness" (see www.freeswitch.org/wiki/SSD_Tuning_for_Linux):
+  - I tried adding these two lines to /etc/sysctl.conf to change Linux "swappiness" (see www.freeswitch.org/wiki/SSD_Tuning_for_Linux):
 
-      vm.swappiness=1
-      vm.vfs_cache_pressure=50
+          vm.swappiness=1
+          vm.vfs_cache_pressure=50
+
+    but it just causes havoc!  So I switched back to the defaults of 60, 100.
+
+  - I made a script
+
+          wstein@pixel:~$ more /usr/local/bin/sacrifice
+          echo f > /proc/sysrq-trigger
+
+    and set a keyboard shortcut to it.   If the machine becomes unresponsive when thrashing, I hit that keyboard shortcut to start killing things.
 
 
+
+## Resources
+
+ - This page on archlinux natively looks useful: https://docs.google.com/document/d/1yPh0Tk0ncONFShZcoD7rjW8nZ29Ra42HhbooK51_kE8/pub
 
 ## Initial Install to SD card
 
@@ -120,13 +135,13 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
 
 - [x] download photos from my camera(s) -- can use sd card, etc., of course
 
-- [x] netflix: via netflix-desktop which is in Saucy Ubuntu now.
 
 ## Low priority issues/questions
 
 - [ ] LTE+Verizon (probably impossible -- don't care)
 - [ ] Google Drive sync (?) -- don't care.
 - [ ] offline copy of my email in thunderbird -- I have too much email...
+- [ ] netflix: via netflix-desktop which is in Saucy Ubuntu now... but it does not work for me.  I don't really care, since I don't need to watch netflix on my laptop anyways.
 
 
 ## Plan for installing Linux on the internal SSD:
