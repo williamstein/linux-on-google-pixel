@@ -30,7 +30,7 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
           wstein@pixel:~$ more /usr/local/bin/sacrifice
           echo f > /proc/sysrq-trigger
 
-    and set a keyboard shortcut to it.   If the machine becomes unresponsive when thrashing, I hit that keyboard shortcut to start killing things.
+    and set a keyboard shortcut to it.   If the machine becomes unresponsive when thrashing, I hit that keyboard shortcut to start killing things.$
 
 
 
@@ -55,6 +55,20 @@ These are just some random notes oriented toward my own needs.  This is *not* a 
    Brock Tice's:  <https://drive.google.com/#folders/0B-HqdeY6UX2FREEtR0t6dnFoSEE>
 
    Vladikoff's:   <https://github.com/vladikoff/chromebook-pixel-ubuntu-13-patch>
+
+
+## Trackpad configuration
+
+I use syndaemon by typing the following at the command line to get "disable touchpad when not in use for 1 second", which isn't exactly palm detection, but works very well for me:
+
+    syndaemon -i 1 -m 100 -d -R
+
+Also, to configure the trackpad to be usable, I use this one command on the command line:
+
+    synclient  MinSpeed=.02; synclient AccelFactor=.15; synclient MaxSpeed=.5; synclient MaxDoubleTapTime=80; synclient MaxTapTime=80
+
+*Rant:* I have tried *many* GUI programs for trackpad config, but it turns out -- much to my surprise -- that synclient is vastly superior, since it exposes all options, and the full range of parameters for each.  The GUI programs are really bad, because they expose only a small subset of parameters -- and worse, they expose only a small and misleading subset of *values* for the parameters they provide. (The values might be OK on non-HiDPI?)
+
 
 
 
